@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Soldering Simulator.sln"
+    "dotnet.defaultSolution": "Soldering-Simulator.sln"
 }

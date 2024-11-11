@@ -24,7 +24,7 @@ public class SceneController : MonoBehaviour
     }
 
     public void ResetPOV(){
-        transform.position = new Vector3(Camera.main.transform.position.x, Camera.main.transform.position.y + offsetY, Camera.main.transform.position.z + offsetZ);
+        transform.position = new Vector3(Camera.main.transform.position.x, Camera.main.transform.position.y, Camera.main.transform.position.z) + Camera.main.transform.forward * offsetZ + Camera.main.transform.up * offsetY;
         // transform.localRotation = Quaternion.identity;
         transform.eulerAngles = new Vector3(0, Camera.main.transform.eulerAngles.y, 0);
         transform.SetParent(null);
