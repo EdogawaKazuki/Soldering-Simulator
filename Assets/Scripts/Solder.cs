@@ -88,6 +88,7 @@ public class Solder : MonoBehaviour
             }
         }
         if(other.name.Contains("Reset")){
+            Debug.Log("Reset");
             ResetGame();
         }
     }

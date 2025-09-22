@@ -41,11 +41,34 @@ public class RobotConnector : MonoBehaviour
 	public Transform forceDirectionIndicatorX;
 	public Transform forceDirectionIndicatorY;
 	public Transform forceDirectionIndicatorZ;
+
+	public Transform PCB;
+	public Transform HPRecovery;
+
+	public List<Transform> targetPoints;
+
+	int lastTargetIndex = 0;
+	int currentTargetIndex = 0;
+	bool isTraining = false;
 	#endregion
 
 	#region MonoBehaviour
     private void Start(){
         SetConnect(true);
+		targetPoints = new List<Transform>();
+		Transform targetPointsParent = GameObject.Find("Interactable/Handle Moving Range/GainLearningDots").transform;
+		for(int i = 0; i < targetPointsParent.childCount; i++){ // leyers
+			for (int j = 0; j < targetPointsParent.GetChild(i).childCount; j++){ // rows
+				for (int k = 0; k < targetPointsParent.GetChild(i).GetChild(j).childCount; k++){ // columns
+					targetPoints.Add(targetPointsParent.GetChild(i).GetChild(j).GetChild(k).transform);
+				}
+			}
+		}
+		for(int i = 0; i < targetPoints.Count; i++){
+			targetPoints[i].gameObject.SetActive(false);
+		}
+		PCB = GameObject.Find("Interactable/Handle Moving Range/PCB").transform;
+		HPRecovery = GameObject.Find("Interactable/Handle Moving Range/HPRecovery").transform;
     }
     private void Update(){
         endEffector.localPosition = robotPos;
@@ -58,6 +81,15 @@ public class RobotConnector : MonoBehaviour
             SendCalibrationCmd();
 			Debug.Log("Calibration sent");
         }
+		targetPoints[lastTargetIndex].gameObject.SetActive(false);
+		if (isTraining){
+			PCB.gameObject.SetActive(false);
+			HPRecovery.gameObject.SetActive(false);
+			targetPoints[currentTargetIndex].gameObject.SetActive(true);
+		}else{
+			PCB.gameObject.SetActive(true);
+			HPRecovery.gameObject.SetActive(true);
+		}
     }
     private void OnApplicationQuit()
 	{
@@ -97,7 +129,7 @@ public class RobotConnector : MonoBehaviour
 				byteArray[0] = 0;
 				byteArray[1] = 1;
 				ClientSocket.SendTo(byteArray, byteArray.Length, SocketFlags.None, ServerEndPoint);
-
+				Debug.Log("Sending Connect Command");
 				connectThread = new Thread(new ThreadStart(ServerMsgHandler));
 				connectThread.Start();
                 _connected = true;
@@ -127,6 +159,11 @@ public class RobotConnector : MonoBehaviour
                     // robotPos = new Vector3(BitConverter.ToSingle(recvData, 0), BitConverter.ToSingle(recvData, 4), BitConverter.ToSingle(recvData, 8));
                     robotPos = new Vector3(BitConverter.ToSingle(recvData, 0), 2 * BitConverter.ToSingle(recvData, 4), BitConverter.ToSingle(recvData, 8));
                     forceDirection = new Vector3(Mathf.Rad2Deg * BitConverter.ToSingle(recvData, 12), Mathf.Rad2Deg * BitConverter.ToSingle(recvData, 16), Mathf.Rad2Deg * BitConverter.ToSingle(recvData, 20));
+					isTraining = 1 == BitConverter.ToSingle(recvData, 24);
+					lastTargetIndex = currentTargetIndex;
+					currentTargetIndex = (int)BitConverter.ToSingle(recvData, 28);
+
+					// Debug.Log("Is Training: " + isTraining + " Current Target Index: " + currentTargetIndex);
                     // Debug.Log("Robot Pos: " + robotPos);
                 }
             }
@@ -169,6 +206,7 @@ public class RobotConnector : MonoBehaviour
 
 	}
 	public void SendStartCmd(){
+		Debug.Log("Sending Start Command");
 		if (!_connected) {
 			Debug.Log("Not connected to robot");
 			return;
@@ -180,6 +218,7 @@ public class RobotConnector : MonoBehaviour
 		}
 	}
 	public void SendStopCmd(){
+		Debug.Log("Sending Stop Command");
 		if (!_connected) {
 			Debug.Log("Not connected to robot");
 			return;
