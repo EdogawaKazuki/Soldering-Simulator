@@ -157,7 +157,7 @@ public class RobotConnector : MonoBehaviour
                 if (recvLen > 0)
                 {
                     // robotPos = new Vector3(BitConverter.ToSingle(recvData, 0), BitConverter.ToSingle(recvData, 4), BitConverter.ToSingle(recvData, 8));
-                    robotPos = new Vector3(BitConverter.ToSingle(recvData, 0), 2 * BitConverter.ToSingle(recvData, 4), BitConverter.ToSingle(recvData, 8));
+                    robotPos = new Vector3(BitConverter.ToSingle(recvData, 0), BitConverter.ToSingle(recvData, 4), BitConverter.ToSingle(recvData, 8));
                     forceDirection = new Vector3(Mathf.Rad2Deg * BitConverter.ToSingle(recvData, 12), Mathf.Rad2Deg * BitConverter.ToSingle(recvData, 16), Mathf.Rad2Deg * BitConverter.ToSingle(recvData, 20));
 					isTraining = 1 == BitConverter.ToSingle(recvData, 24);
 					lastTargetIndex = currentTargetIndex;
